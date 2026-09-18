@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Verb Cribbage &middot; two players</title>
+<style>
+:root{--felt:#2f6b57;--deep:#24413a;--night:#16241f;--panel:#2c3f39;--edge:#3c5158;
+  --ivory:#f7f0e5;--dim:#a8b6ad;--gold:#fda300;--red:#fd5f54;--blue:#3cb4ff;
+  --green:#74cca7;--paper:#fbf6ea;--coal:#22201c;--wood:#a9743f}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--night);color:var(--ivory);
+  font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{display:flex;flex-direction:column;align-items:center;overflow-y:auto;
+  background:radial-gradient(120% 90% at 50% 20%,#38806a,var(--felt) 60%,#255745)}
+.wrap{width:100%;max-width:1200px;padding:14px 18px 22px}
+h1{text-align:center;margin:0 0 2px;font-size:30px;color:var(--gold)}
+.sub{text-align:center;font-size:13px;color:var(--dim);margin-bottom:10px}
+.board{background:var(--wood);border:3px solid #6d4a27;border-radius:10px;padding:8px 12px;
+  margin:0 auto 10px;max-width:900px;box-shadow:inset 0 2px 0 #c99154}
+.blab{display:flex;justify-content:space-between;font-size:10.5px;color:#4a2f14;
+  font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+.track{position:relative;height:18px;margin:3px 0;background:rgba(0,0,0,.16);border-radius:5px}
+.peg{position:absolute;top:-2px;width:10px;height:22px;border-radius:3px;transition:left .35s ease;
+  box-shadow:0 2px 0 rgba(0,0,0,.4)}
+.peg.a{background:linear-gradient(#ffd884,#c88a1e)}
+.peg.b{background:linear-gradient(#ff9d94,#c0392b)}
+.tally{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:10px}
+.tb{background:var(--deep);border:2px solid #222e31;border-radius:8px;padding:4px 12px;
+  text-align:center;min-width:78px}
+.tb.on{border-color:var(--gold)}
+.tb .l{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:var(--dim)}
+.tb b{font-size:19px;font-weight:800}
+.gold{color:var(--gold)} .red{color:var(--red)} .blue{color:var(--blue)}
+.word{background:rgba(0,0,0,.24);border:2px solid rgba(0,0,0,.28);border-radius:12px;
+  padding:16px 22px;text-align:center;min-height:132px}
+.wf{font-size:34px;font-weight:800;min-height:42px}
+.pieces{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-top:7px;min-height:32px}
+.pc{border-radius:8px;padding:3px 11px;font-size:16px;font-weight:700;border:2px solid var(--edge);
+  background:rgba(0,0,0,.25);animation:pop .35s}
+.pc.a{border-color:var(--gold);color:var(--gold)} .pc.b{border-color:var(--red);color:var(--red)}
+.pc.wild{border-color:#c98bff;color:#c98bff}
+.pc i{display:block;font-style:normal;font-size:9px;color:var(--dim)}
+@keyframes pop{0%{transform:translateY(-14px) scale(.6);opacity:0}100%{transform:none;opacity:1}}
+.turnline{margin-top:8px;font-size:15px;color:var(--gold);font-style:italic;min-height:20px}
+.hint{color:var(--dim);font-style:italic;font-size:15px}
+.hand{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:16px;min-height:140px}
+.card{width:96px;height:134px;background:var(--paper);color:var(--coal);border-radius:8px;
+  border:2px solid #d9d2c2;box-shadow:0 3px 0 rgba(0,0,0,.35);position:relative;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px 5px;
+  transition:transform .12s}
+.card.r{color:#b8322b}
+.card:hover{transform:translateY(-6px)}
+.card.dead{opacity:.32;cursor:not-allowed;background:#cfd9cf}
+.card.dead:hover{transform:none}
+.card.wild{background:linear-gradient(#efe2ff,#d8c2f5);border-color:#c98bff;color:#5a2a80}
+.card.wild .m{font-size:36px}
+.rk{position:absolute;top:3px;left:5px;font-size:15px;font-weight:800;line-height:1}
+.rk i{display:block;font-style:normal;font-size:13px}
+.val{position:absolute;top:3px;right:5px;font-size:12px;font-weight:800;color:#7d8a97}
+.m{font-size:18px;font-weight:700;text-align:center;word-break:break-word;line-height:1.14}
+.m.long{font-size:14px}
+.gl{font-size:11px;font-style:italic;color:#8a8375;margin-top:3px}
+.sl{position:absolute;bottom:3px;left:0;right:0;text-align:center;font-size:9.5px;color:#9a9382}
+.foot{display:flex;gap:10px;justify-content:center;margin:14px 0 8px}
+.btn{border:none;border-radius:9px;padding:9px 20px;font-size:14px;font-weight:800;cursor:pointer;
+  background:var(--panel);color:var(--ivory);box-shadow:0 3px 0 rgba(0,0,0,.35)}
+.btn.go{background:var(--gold);color:#3a2a00}
+.btn[disabled]{opacity:.4;cursor:default}
+.log{max-width:900px;margin:10px auto 0;height:118px;overflow-y:auto;font-size:12px;
+  color:var(--dim);line-height:1.55;background:rgba(0,0,0,.22);border:2px solid #222e31;
+  border-radius:9px;padding:8px 12px;text-align:left}
+.log div{padding:1px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.log div:last-child{border-bottom:none}
+.log .me{color:var(--gold)} .log .them{color:var(--red)}
+.veil{position:fixed;inset:0;background:rgba(16,32,26,.95);display:flex;align-items:center;
+  justify-content:center;padding:20px;z-index:20;overflow:auto}
+.sheet{max-width:600px;width:100%;background:var(--night);border:3px solid #1f2a2d;
+  border-radius:12px;padding:24px 28px}
+.sheet h1{font-size:36px;margin-bottom:8px}
+.sheet p{font-size:14px;line-height:1.6;color:#e2ddd0}
+.code{font-size:46px;font-weight:800;letter-spacing:.3em;color:var(--gold);margin:14px 0;text-align:center}
+input{font-size:20px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;width:150px;
+  padding:8px 10px;border-radius:9px;border:2px solid var(--edge);background:var(--panel);
+  color:var(--ivory);text-align:center}
+input.name{letter-spacing:normal;text-transform:none;width:190px;font-weight:600;font-size:15px}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center}
+.status{margin-top:10px;font-size:13px;color:var(--dim);min-height:20px}
+.status.err{color:var(--red)}
+.helplist{display:flex;flex-direction:column;gap:7px;margin-top:10px}
+.helplist div{font-size:13.5px;line-height:1.5;color:#e2ddd0;padding-left:16px;position:relative}
+.helplist div::before{content:"\25b8";position:absolute;left:0;color:var(--gold)}
+</style></head><body>
+<div class="wrap" id="app"></div><div id="overlay"></div>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+/* ---- the one line to change after you deploy ---- */
+const SERVER = "";            // "" means the page's own host, which is right for local
+                              // and right on Render too. Only set this if the page is
+                              // hosted somewhere else, e.g. "https://my-game.onrender.com"
+const sock = SERVER ? io(SERVER) : io();
+
+const SLOT = {adverb:"adv", plural:"9", object:"8", deictic:"7", subject:"1", stem:"0", negative:"neg"};
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const val = c => c.joker ? 0 : Math.min(10, c.rank);
+
+let S = null, code = null, status = "", err = false;
+
+sock.on("hosted", c => { code = c; status = "Waiting for the other player\u2026"; lobby(); });
+sock.on("nope",  m => { status = m; err = true; lobby(); });
+sock.on("gone",  m => { status = m; err = true; S = null; lobby(); });
+sock.on("connect",    () => { if(!S){ status = "Connected."; err = false; lobby(); } });
+sock.on("connect_error", () => { status = "Cannot reach the server."; err = true; lobby(); });
+sock.on("state", st => {
+  S = st;
+  if(!st.started){ lobby(); return; }
+  closeVeil(); draw();
+  if(st.over !== null) setTimeout(over, 600);
+});
+
+function veil(html, wire){
+  $("overlay").innerHTML = '<div class="veil"><div class="sheet">' + html + '</div></div>';
+  if(wire) wire($("overlay"));
+}
+function closeVeil(){ $("overlay").innerHTML = ""; }
+
+function lobby(){
+  veil('<h1>Verb Cribbage</h1>' +
+    '<p>Two players, one deck of H\u00e4n morphemes. Lay a card into any open slot, ' +
+    'one card each turn. First to 61.</p>' +
+    (code
+      ? '<p>Read these four letters to the other player.</p><div class="code">' + code + '</div>'
+      : '<div class="row"><input class="name" id="who" value="Player" maxlength="16"></div>' +
+        '<div class="row"><button class="btn go" id="host">Create room</button></div>' +
+        '<div class="row"><input id="code" maxlength="4" placeholder="CODE">' +
+        '<button class="btn" id="join">Join room</button></div>') +
+    '<div class="row"><button class="btn" id="how">How to play</button></div>' +
+    '<div class="status' + (err ? ' err' : '') + '">' + esc(status) + '</div>',
+    ov => {
+      const nameOf = () => (ov.querySelector("#who") ? ov.querySelector("#who").value : "Player");
+      const h = ov.querySelector("#host");
+      if(h) h.onclick = () => { err=false; status="Connecting\u2026"; sock.emit("host", nameOf()); lobby(); };
+      const j = ov.querySelector("#join");
+      if(j) j.onclick = () => { err=false; status="Connecting\u2026";
+        sock.emit("join", {code: ov.querySelector("#code").value, name: nameOf()}); };
+      ov.querySelector("#how").onclick = help;
+    });
+}
+function help(){
+  const lines = [
+    "One card per turn, then it is the other player's turn.",
+    "Lay into any open slot, in a conjugation that agrees.",
+    "Adverbs use no slot, so any number of them may stack.",
+    "Two points a card. One more for the last card played.",
+    "Two jokers are wild. A joker stands in for whatever the word lacks,",
+    "and returns to your hand when somebody lays the real card for that slot.",
+    "Nothing in hand that fits? You pass and draw on your own.",
+    "When you both pass, a finished word fires for two more, then a reshuffle.",
+    "First to 61 takes it."];
+  veil('<h1>How to play</h1><div class="helplist">' +
+    lines.map(l => '<div>' + esc(l) + '</div>').join("") + '</div>' +
+    '<div class="row"><button class="btn go" id="back">Back</button></div>',
+    ov => { ov.querySelector("#back").onclick = () => (S && S.started) ? closeVeil() : lobby(); });
+}
+function over(){
+  veil('<h1>' + (S.over === S.seat ? "You take it" : "They take it") + '</h1>' +
+    '<p>' + S.score[S.seat] + ' to ' + S.score[1 - S.seat] + '.</p>' +
+    '<div class="row"><button class="btn go" id="again">Again</button></div>',
+    ov => { ov.querySelector("#again").onclick = () => { closeVeil(); sock.emit("again"); }; });
+}
+function track(v, cls){
+  return '<div class="track"><div class="peg ' + cls + '" style="left:calc(' +
+    (v / S.target * 100).toFixed(1) + '% - 5px)"></div></div>';
+}
+function draw(){
+  const me = S.seat, them = 1 - me, mine = S.turn === me;
+  $("app").innerHTML =
+    '<h1>Verb Cribbage</h1><div class="sub">Room ' + esc(S.code) + '</div>' +
+    '<div class="board"><div class="blab"><span>' + esc(S.names[me]) + ' \u2014 ' + S.score[me] + '</span>' +
+      '<span>first to ' + S.target + '</span><span>' + esc(S.names[them]) + ' \u2014 ' + S.score[them] + '</span></div>' +
+      track(S.score[me], "a") + track(S.score[them], "b") + '</div>' +
+    '<div class="tally">' +
+      '<div class="tb ' + (mine ? "on" : "") + '"><div class="l">' + esc(S.names[me]) + '</div><b class="gold">' + S.score[me] + '</b></div>' +
+      '<div class="tb"><div class="l">Count</div><b class="blue">' + S.count + '</b><div class="l">of 31</div></div>' +
+      '<div class="tb ' + (mine ? "" : "on") + '"><div class="l">' + esc(S.names[them]) + '</div><b class="red">' + S.score[them] + '</b></div>' +
+      '<div class="tb"><div class="l">Their cards</div><b>' + S.theirCards + '</b></div>' +
+      '<div class="tb"><div class="l">Pile</div><b>' + S.pile + '</b></div>' +
+    '</div>' +
+    '<div class="word"><div class="wf">' +
+      (S.word.length
+        ? esc(S.wordText || "")
+        : '<span class="hint">Lay any card to open the word</span>') + '</div>' +
+      '<div class="pieces">' + S.word.map((c,i) =>
+        '<span class="pc ' + (c.by === me ? "a" : "b") + (c.joker ? " wild" : "") + '">' +
+        esc(c.morph) + '<i>' + (c.joker ? ("\u2605 " + (SLOT[c.asRole] || "?")) : (SLOT[c.slot] || "")) +
+        '</i></span>').join("") + '</div>' +
+      '<div class="turnline">' + (mine ? "Your turn." : "Waiting for " + esc(S.names[them]) + "\u2026") + '</div>' +
+    '</div>' +
+    '<div class="hand">' + S.hand.map(c => {
+      const ok = mine && !S.busy && S.playable.indexOf(c.id) >= 0;
+      if(c.joker) return '<div class="card wild ' + (ok ? "" : "dead") + '" data-id="' + c.id + '" ' +
+        'title="A joker. It stands in for whatever the word is short of.">' +
+        '<div class="rk">\u2605</div><div class="m">\u2605</div><div class="gl">wild</div></div>';
+      return '<div class="card ' + (c.red ? "r" : "") + ' ' + (ok ? "" : "dead") + '" data-id="' + c.id + '">' +
+        '<div class="rk">' + c.label + '<i>' + c.pip + '</i></div>' +
+        '<div class="val">' + val(c) + '</div>' +
+        '<div class="m' + (c.morph.length > 6 ? " long" : "") + '">' + esc(c.morph) + '</div>' +
+        (c.gloss ? '<div class="gl">' + esc(c.gloss) + '</div>' : "") +
+        '<div class="sl">' + (SLOT[c.slot] || "") + '</div></div>';
+    }).join("") + '</div>' +
+    '<div class="foot"><button class="btn" id="how">How to play</button></div>' +
+    '<div class="log" id="log">' + S.log.map(l => {
+      const who = l.indexOf(S.names[me]) === 0 ? "me" : (l.indexOf(S.names[them]) === 0 ? "them" : "");
+      return '<div class="' + who + '">' + esc(l) + '</div>';
+    }).join("") + '</div>';
+
+  const lg = $("log"); if(lg) lg.scrollTop = lg.scrollHeight;
+  const cards = $("app").querySelectorAll(".card");
+  for(let i = 0; i < cards.length; i++){
+    cards[i].onclick = function(){
+      if(this.className.indexOf("dead") >= 0) return;
+      sock.emit("lay", this.dataset.id);
+    };
+  }
+  $("how").onclick = help;
+}
+status = "Connecting\u2026";
+lobby();
+</script></body></html>
